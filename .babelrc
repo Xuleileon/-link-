@@ -8,7 +8,11 @@
     ["@babel/preset-react", {
       "runtime": "automatic"
     }],
-    "@babel/preset-typescript",
-    "next/babel"
+    "@babel/preset-typescript"
+  ],
+  "plugins": [
+    ["@babel/plugin-transform-runtime", {
+      "regenerator": true
+    }]
   ]
 }

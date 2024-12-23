@@ -1,33 +1,36 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable all SWC features
+  // Disable SWC completely
   swcMinify: false,
-  
-  // Configure transpilation
-  transpilePackages: [],
-  
-  // Disable experimental features
   experimental: {
-    swcMinify: false,
-    swcTraceProfiling: false,
     forceSwcTransforms: false,
-    swcPlugins: false,
-    serverComponents: false,
-    swcFileReading: false
+    swcMinify: false,
+    swcLoader: false,
+    swcTraceProfiling: false
   },
   
   // Configure webpack to use Babel
   webpack: (config, { dev, isServer }) => {
-    // Force Babel for all JS/TS files
-    config.module.rules.push({
-      test: /\.(js|jsx|ts|tsx)$/,
-      exclude: /node_modules/,
-      use: {
-        loader: 'babel-loader',
-        options: {
-          presets: ['next/babel']
-        }
+    // Disable SWC loader
+    config.module.rules = config.module.rules.map((rule) => {
+      if (rule.oneOf) {
+        rule.oneOf = rule.oneOf.map((oneOfRule) => {
+          if (oneOfRule.use && oneOfRule.use.loader === 'next-swc-loader') {
+            return {
+              ...oneOfRule,
+              use: {
+                loader: 'babel-loader',
+                options: {
+                  cacheDirectory: true,
+                  presets: ['next/babel']
+                }
+              }
+            };
+          }
+          return oneOfRule;
+        });
       }
+      return rule;
     });
 
     return config;
